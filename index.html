@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Global Header --- */
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .app-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 5px; }
+        .app-subtitle { color: var(--text-sub); margin-top: 0; }
+
+        /* --- Navigation Tabs --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 12px;
+            margin: 0 auto 30px auto;
+            max-width: 400px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- Views --- */
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Controls Toolbar --- */
+        .toolbar {
+            background: var(--surface);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05);
+        }
+
+        @media(min-width: 768px) {
+            .toolbar { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media(min-width: 768px) {
+            .toolbar-group { flex-direction: row; align-items: center; gap: 20px; }
+        }
+
+        /* Dropdown */
+        .select-wrapper { display: flex; flex-direction: column; }
+        .select-wrapper label { font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
+        .select-wrapper select {
+            padding: 8px 30px 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            font-weight: 600;
+            background: #f8fafc;
+            cursor: pointer;
+            min-width: 160px;
+        }
+
+        /* Button Groups (Time) */
+        .btn-group {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 3px;
+            display: inline-flex;
+        }
+
+        .btn-group button {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .btn-group button.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* Slider for Arbitrage */
+        .slider-wrapper { width: 100%; max-width: 300px; }
+        .slider-wrapper input { width: 100%; cursor: pointer; }
+        .slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-top: 5px; }
+        .slider-labels span.active { color: var(--primary); }
+
+        /* --- Grids & Cards --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 280px; /* Uniform height */
+        }
+
+        /* Arbitrage Cards need more space */
+        #arbitrage-view .card { height: 340px; }
+
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        
+        .currency-info { display: flex; flex-direction: column; }
+        .flag { font-size: 1.5rem; margin-bottom: 4px; }
+        .title { font-weight: 700; font-size: 1.1rem; }
+        .subtitle { font-size: 0.8rem; color: var(--text-sub); }
+
+        .price-info { text-align: right; }
+        .price { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; display: block; }
+        
+        .badge {
+            display: inline-block; padding: 4px 8px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700; margin-top: 4px;
+        }
+        .badge.green { background: #dcfce7; color: #166534; }
+        .badge.red { background: #fee2e2; color: #991b1b; }
+        .badge.neutral { background: #f1f5f9; color: var(--text-sub); }
+
+        /* Chart Area */
+        .chart-box { flex-grow: 1; position: relative; width: 100%; min-height: 0; }
+
+        /* RSI Meter */
+        .rsi-container { margin: 10px 0 15px 0; }
+        .rsi-labels { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px; font-weight: 600; }
+        .rsi-track { height: 8px; background: #e2e8f0; border-radius: 4px; position: relative; overflow: hidden; }
+        .rsi-gradient {
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, #e2e8f0 35%, #e2e8f0 65%, var(--danger) 100%);
+        }
+        .rsi-pip {
+            position: absolute; top: 0; bottom: 0; width: 4px; background: var(--text-main);
+            transition: left 0.3s ease; z-index: 2;
+        }
+
+        .recommendation {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 8px;
+            padding: 4px;
+            border-radius: 4px;
+            background: #f8fafc;
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 600; color: var(--text-sub);
+        }
+        .hidden { display: none; }
+
+        /* Helper for mobile responsiveness */
+        .mobile-col { display: flex; flex-direction: column; gap: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader" class="loader">Loading Market Data...</div>
+
+    <div class="container">
+        <header class="app-header">
+            <div class="app-title">FX Command Center</div>
+            <p class="app-subtitle">Real-time reference rates & statistical analysis</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="switchTab('market')">Market Watch</button>
+            <button class="tab-btn" onclick="switchTab('arbitrage')">Arbitrage Scanner</button>
+        </nav>
+
+        <!-- VIEW 1: MARKET WATCH -->
+        <section id="market-view" class="view-section active">
+            <div class="toolbar">
+                <div class="select-wrapper">
+                    <label>BASE CURRENCY</label>
+                    <select id="mw-base-select" onchange="MW.updateBase(this.value)">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <div class="mobile-col">
+                    <div class="btn-group">
+                        <button onclick="MW.updatePeriod(7, this)">1W</button>
+                        <button onclick="MW.updatePeriod(30, this)">1M</button>
+                        <button class="active" onclick="MW.updatePeriod(90, this)">3M</button>
+                        <button onclick="MW.updatePeriod(365, this)">1Y</button>
+                        <button onclick="MW.updatePeriod(1825, this)">5Y</button>
+                    </div>
+                </div>
+            </div>
+            <div id="mw-grid" class="grid"></div>
+        </section>
+
+        <!-- VIEW 2: ARBITRAGE SCANNER -->
+        <section id="arbitrage-view" class="view-section">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <div class="select-wrapper">
+                        <label>FOCUS CURRENCY</label>
+                        <select id="arb-base-select" onchange="ARB.updateBase(this.value)">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="mobile-col" style="justify-content: center;">
+                        <div style="font-size:0.85rem; color:var(--text-sub)" id="arb-mode-label">Mode: RSI(14) Standard</div>
+                    </div>
+                </div>
+                
+                <div class="slider-wrapper">
+                    <input type="range" min="0" max="5" step="1" value="3" oninput="ARB.handleSlider(this.value)">
+                    <div class="slider-labels" id="arb-labels">
+                        <span>1M</span><span>3M</span><span>6M</span><span class="active">1Y</span><span>2Y</span><span>5Y</span>
+                    </div>
+                </div>
+            </div>
+            <div id="arb-grid" class="grid"></div>
+        </section>
+    </div>
+
+    <script>
+        // === SHARED UTILITIES & CONFIG ===
+        
+        const CURRENCIES = {
+            'AUD': { flag: '🇦🇺', name: 'Australian Dollar' },
+            'USD': { flag: '🇺🇸', name: 'US Dollar' },
+            'EUR': { flag: '🇪🇺', name: 'Euro' },
+            'GBP': { flag: '🇬🇧', name: 'British Pound' },
+            'JPY': { flag: '🇯🇵', name: 'Japanese Yen' },
+            'NZD': { flag: '🇳🇿', name: 'NZ Dollar' },
+            'CAD': { flag: '🇨🇦', name: 'Canadian Dollar' },
+            'SGD': { flag: '🇸🇬', name: 'Singapore Dollar' },
+            'CHF': { flag: '🇨🇭', name: 'Swiss Franc' },
+            'CNY': { flag: '🇨🇳', name: 'Chinese Yuan' }
+        };
+
+        // Robust Date Parser to fix "Offset Since Epoch" issues
+        function parseDate(dateStr) {
+            return new Date(dateStr + 'T12:00:00');
+        }
+
+        function getStartDate(daysAgo) {
+            const d = new Date();
+            d.setDate(d.getDate() - daysAgo);
+            return d.toISOString().split('T')[0];
+        }
+
+        function formatTooltipDate(timestamp, showDayName) {
+            const date = new Date(timestamp);
+            const opts = { year: 'numeric', month: 'short', day: 'numeric' };
+            if (showDayName) opts.weekday = 'short';
+            return date.toLocaleDateString(undefined, opts);
+        }
+
+        const Loader = {
+            show: () => document.getElementById('global-loader').classList.remove('hidden'),
+            hide: () => document.getElementById('global-loader').classList.add('hidden')
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${tabId}-view`).classList.add('active');
+
+            if(tabId === 'market') MW.init();
+            if(tabId === 'arbitrage') ARB.init();
+        }
+
+        // === MODULE 1: MARKET WATCH (MW) ===
+        const MW = {
+            base: 'AUD',
+            days: 90,
+            charts: {},
+
+            init: function() {
+                const sel = document.getElementById('mw-base-select');
+                if (sel.children.length === 0) {
+                    Object.keys(CURRENCIES).forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c;
+                        opt.text = `${c} - ${CURRENCIES[c].name}`;
+                        if(c === this.base) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                    this.fetchData();
+                }
+            },
+
+            updateBase: function(newBase) {
+                this.base = newBase;
+                this.fetchData();
+            },
+
+            updatePeriod: function(days, btn) {
+                this.days = days;
+                btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.fetchData();
+            },
+
+            fetchData: async function() {
+                Loader.show();
+                const targets = Object.keys(CURRENCIES).filter(c => c !== this.base).join(',');
+                const start = getStartDate(this.days);
+                const url = `https://api.frankfurter.app/${start}..?from=${this.base}&to=${targets}`;
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    this.render(data);
+                } catch(e) {
+                    console.error(e);
+                    alert("API Error");
+                } finally {
+                    Loader.hide();
+                }
+            },
+
+            render: function(data) {
+                const grid = document.getElementById('mw-grid');
+                grid.innerHTML = '';
+                this.charts = {};
+
+                const dates = Object.keys(data.rates).sort();
+                const targets = Object.keys(CURRENCIES).filter(c => c !== this.base);
+
+                targets.forEach(code => {
+                    const series = dates.map(d => ({
+                        x: parseDate(d),
+                        y: data.rates[d][code]
+                    })).filter(pt => pt.y !== undefined);
+
+                    if(series.length === 0) return;
+
+                    const current = series[series.length-1].y;
+                    const start = series[0].y;
+                    const change = ((current - start) / start) * 100;
+                    const isPos = change >= 0;
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="currency-info">
+                                <span class="flag">${CURRENCIES[code].flag}</span>
+                                <span class="title">${this.base}/${code}</span>
+                                <span class="subtitle">${CURRENCIES[code].name}</span>
+                            </div>
+                            <div class="price-info">
+                                <span class="price">${current.toFixed(code==='JPY'?2:4)}</span>
+                                <span class="badge ${isPos ? 'green' : 'red'}">
+                                    ${isPos ? '+' : ''}${change.toFixed(2)}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="mw-chart-${code}"></canvas>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                    this.drawChart(code, series, isPos);
+                });
+            },
+
+            drawChart: function(code, data, isPositive) {
+                const ctx = document.getElementById(`mw-chart-${code}`).getContext('2d');
+                const color = isPositive ? '#10b981' : '#ef4444';
+                const vals = data.map(d => d.y);
+                const min = Math.min(...vals) * 0.995;
+                const max = Math.max(...vals) * 1.005;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            data: data,
+                            borderColor: color,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: {
+                                target: 'origin',
+                                above: (ctx) => {
+                                    const grad = ctx.chart.ctx.createLinearGradient(0,0,0,200);
+                                    grad.addColorStop(0, color+'20');
+                                    grad.addColorStop(1, '#ffffff00');
+                                    return grad;
+                                }
+                            },
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                intersect: false,
+                                mode: 'index',
+                                callbacks: {
+                                    title: (items) => formatTooltipDate(items[0].parsed.x, this.days <= 30)
+                                }
+                            }
+                        },
+                        scales: { x: { type: 'time', display: false }, y: { display: false, min: min, max: max } },
+                        interaction: { intersect: false, mode: 'nearest', axis: 'x' }
+                    }
+                });
+            }
+        };
+
+        // === MODULE 2: ARBITRAGE SCANNER (ARB) ===
+        const ARB = {
+            base: 'AUD',
+            currentSliderVal: 3,
+            dataStore: {}, // Stores raw 5-year history per base currency
+            charts: {},
+            sliderConfigs: [
+                { days: 30, rsi: 5, label: "RSI(5) | High Sensitivity" },    // 1M
+                { days: 90, rsi: 9, label: "RSI(9) | Medium Sensitivity" },  // 3M
+                { days: 180, rsi: 14, label: "RSI(14) | Standard" },         // 6M
+                { days: 365, rsi: 14, label: "RSI(14) | Standard" },         // 1Y
+                { days: 730, rsi: 14, label: "RSI(14) | Standard" },         // 2Y
+                { days: 1825, rsi: 14, label: "RSI(14) | Standard" }         // 5Y
+            ],
+
+            init: function() {
+                // Populate Dropdown
+                const sel = document.getElementById('arb-base-select');
+                if (sel.children.length === 0) {
+                    Object.keys(CURRENCIES).forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c;
+                        opt.text = `${c} - ${CURRENCIES[c].name}`;
+                        if(c === this.base) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                    this.loadDataForBase(this.base);
+                }
+            },
+
+            updateBase: function(newBase) {
+                this.base = newBase;
+                this.loadDataForBase(newBase);
+            },
+
+            loadDataForBase: async function(base) {
+                // Check cache
+                if(this.dataStore[base]) {
+                    this.handleSlider(this.currentSliderVal);
+                    return;
+                }
+
+                Loader.show();
+                const start = getStartDate(2000); // 5Y + buffer
+                const targets = Object.keys(CURRENCIES).filter(c => c !== base).join(',');
+                
+                try {
+                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=${base}&to=${targets}`);
+                    const data = await res.json();
+                    
+                    // Process & Cache
+                    const dates = Object.keys(data.rates).sort();
+                    const targetList = Object.keys(CURRENCIES).filter(c => c !== base);
+                    
+                    this.dataStore[base] = {}; // Init cache for this base
+
+                    targetList.forEach(quote => {
+                        this.dataStore[base][quote] = dates.map(d => ({
+                            dateStr: d,
+                            dateObj: parseDate(d),
+                            val: data.rates[d][quote]
+                        })).filter(pt => pt.val !== undefined);
+                    });
+
+                    this.handleSlider(this.currentSliderVal);
+                } catch(e) {
+                    console.error(e);
+                    alert("Error loading Arbitrage Data");
+                } finally {
+                    Loader.hide();
+                }
+            },
+
+            handleSlider: function(val) {
+                this.currentSliderVal = val;
+                const config = this.sliderConfigs[val];
+                
+                // Update UI Labels
+                const labels = document.getElementById('arb-labels').children;
+                for(let i=0; i<labels.length; i++) {
+                    labels[i].className = i == val ? 'active' : '';
+                }
+                document.getElementById('arb-mode-label').innerText = `Mode: ${config.label}`;
+
+                this.render(config);
+            },
+
+            calculateRSI: function(values, period) {
+                if(values.length < period) return 50;
+                
+                let gains = 0, losses = 0;
+                for(let i=1; i<=period; i++) {
+                    const diff = values[i] - values[i-1];
+                    if(diff > 0) gains += diff; else losses += Math.abs(diff);
+                }
+                let avgGain = gains/period;
+                let avgLoss = losses/period;
+                
+                // Smoothing
+                for(let i=period+1; i<values.length; i++) {
+                    const diff = values[i] - values[i-1];
+                    const up = diff > 0 ? diff : 0;
+                    const down = diff < 0 ? Math.abs(diff) : 0;
+                    
+                    avgGain = ((avgGain * (period-1)) + up) / period;
+                    avgLoss = ((avgLoss * (period-1)) + down) / period;
+                }
+
+                if(avgLoss === 0) return 100;
+                const rs = avgGain / avgLoss;
+                return 100 - (100 / (1 + rs));
+            },
+
+            render: function(config) {
+                const grid = document.getElementById('arb-grid');
+                grid.innerHTML = ''; // Full re-render for dynamic pairs
+                this.charts = {};
+
+                const targetList = Object.keys(CURRENCIES).filter(c => c !== this.base);
+
+                targetList.forEach(quote => {
+                    // Unique ID for DOM elements
+                    const pairId = `${this.base}-${quote}`;
+                    const allData = this.dataStore[this.base][quote];
+                    
+                    if(!allData) return;
+
+                    // Slice data needed for calc
+                    const buffer = config.rsi * 2;
+                    const slice = allData.slice(-(config.days + buffer));
+                    
+                    if(slice.length < config.rsi) return;
+
+                    // Calculate RSI
+                    const prices = slice.map(d => d.val);
+                    const rsi = this.calculateRSI(prices, config.rsi);
+                    const currentPrice = prices[prices.length-1];
+
+                    // Recommendation Logic
+                    let actionText = "HOLD";
+                    let actionColor = "var(--text-sub)";
+                    
+                    if (rsi < 30) {
+                        actionText = `Buy ${this.base} / Sell ${quote}`;
+                        actionColor = "var(--success)";
+                    } else if (rsi > 70) {
+                        actionText = `Sell ${this.base} / Buy ${quote}`;
+                        actionColor = "var(--danger)";
+                    }
+
+                    // Create Card
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `
+                        <div class="card-header">
+                            <div><div class="title">${this.base}/${quote}</div></div>
+                            <div class="price-info">
+                                <div class="price">${currentPrice.toFixed(4)}</div>
+                            </div>
+                        </div>
+                        <div class="rsi-container">
+                            <div class="rsi-labels">
+                                <span style="font-weight:800; color:${actionColor}">${actionText}</span>
+                                <span>RSI: ${rsi.toFixed(0)}</span>
+                            </div>
+                            <div class="rsi-track">
+                                <div class="rsi-gradient"></div>
+                                <div class="rsi-pip" style="left:${rsi}%"></div>
+                            </div>
+                        </div>
+                        <div class="recommendation" style="color:${actionColor}; border:1px solid ${actionColor}20; background:${actionColor}10">
+                            Signal: ${rsi < 30 ? 'Oversold (Cheap)' : (rsi > 70 ? 'Overbought (Expensive)' : 'Fair Value')}
+                        </div>
+                        <div class="chart-box" style="margin-top:10px">
+                            <canvas id="arb-chart-${pairId}"></canvas>
+                        </div>
+                    `;
+                    grid.appendChild(div);
+
+                    // Chart
+                    const visibleData = slice.slice(-config.days).map(d => ({ x: d.dateObj, y: d.val }));
+                    this.drawChart(pairId, visibleData, rsi);
+                });
+            },
+
+            drawChart: function(id, data, rsi) {
+                const ctx = document.getElementById(`arb-chart-${id}`).getContext('2d');
+                const color = rsi < 30 ? '#10b981' : (rsi > 70 ? '#ef4444' : '#64748b');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            data: data,
+                            borderColor: color,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                intersect: false,
+                                mode: 'index',
+                                callbacks: {
+                                    title: (items) => formatTooltipDate(items[0].parsed.x, false)
+                                }
+                            }
+                        },
+                        scales: { x: { type: 'time', display: false }, y: { display: false } },
+                        interaction: { intersect: false, mode: 'nearest', axis: 'x' }
+                    }
+                });
+            }
+        };
+
+        // Init App
+        MW.init();
+
+    </script>
+</body>
+</html>
