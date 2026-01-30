@@ -17,6 +17,7 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             --border: #e2e8f0;
+            --cell-highlight: #f1f5f9;
         }
 
         body {
@@ -27,34 +28,30 @@
             padding: 20px;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        /* --- Global Header --- */
-        .app-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
+        /* --- Header --- */
+        .app-header { text-align: center; margin-bottom: 30px; }
         .app-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 5px; }
         .app-subtitle { color: var(--text-sub); margin-top: 0; }
 
-        /* --- Navigation Tabs --- */
+        /* --- Tabs --- */
         .tabs {
             display: flex;
             justify-content: center;
+            /* flex-wrap: wrap; Removed to ensure single row */
             background: #e2e8f0;
             padding: 4px;
             border-radius: 12px;
             margin: 0 auto 30px auto;
-            max-width: 400px;
+            max-width: 850px; /* Increased to fit all tabs */
+            gap: 2px;
+            overflow-x: auto; /* Horizontal scroll on very small screens */
         }
 
         .tab-btn {
-            flex: 1;
-            padding: 10px 20px;
+            flex: 1; /* Equal width, dynamic sizing */
+            padding: 10px 8px; /* Reduced side padding */
             border: none;
             background: transparent;
             border-radius: 8px;
@@ -62,6 +59,8 @@
             color: var(--text-sub);
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.85rem; /* Slightly smaller text */
+            white-space: nowrap;
         }
 
         .tab-btn.active {
@@ -73,10 +72,9 @@
         /* --- Views --- */
         .view-section { display: none; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Controls Toolbar --- */
+        /* --- Toolbar --- */
         .toolbar {
             background: var(--surface);
             padding: 15px 20px;
@@ -93,17 +91,11 @@
             .toolbar { flex-direction: row; justify-content: space-between; align-items: center; }
         }
 
-        .toolbar-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
+        .toolbar-group { display: flex; flex-direction: column; gap: 15px; }
         @media(min-width: 768px) {
             .toolbar-group { flex-direction: row; align-items: center; gap: 20px; }
         }
 
-        /* Dropdown */
         .select-wrapper { display: flex; flex-direction: column; }
         .select-wrapper label { font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
         .select-wrapper select {
@@ -117,67 +109,42 @@
             min-width: 160px;
         }
 
-        /* Button Groups (Time) */
-        .btn-group {
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 3px;
-            display: inline-flex;
-        }
-
+        .btn-group { background: #f1f5f9; border-radius: 8px; padding: 3px; display: inline-flex; }
         .btn-group button {
-            border: none;
-            background: transparent;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-sub);
-            cursor: pointer;
+            border: none; background: transparent; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-sub); cursor: pointer;
         }
-
-        .btn-group button.active {
-            background: var(--surface);
-            color: var(--primary);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        /* Slider for Arbitrage */
-        .slider-wrapper { width: 100%; max-width: 300px; }
-        .slider-wrapper input { width: 100%; cursor: pointer; }
-        .slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-top: 5px; }
-        .slider-labels span.active { color: var(--primary); }
+        .btn-group button.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
         /* --- Grids & Cards --- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
         .card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            height: 280px; /* Uniform height */
+            background: var(--surface); border-radius: 16px; padding: 20px;
+            border: 1px solid var(--border); box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; height: 280px;
         }
 
-        /* Arbitrage Cards need more space */
         #arbitrage-view .card { height: 340px; }
 
         .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        
         .currency-info { display: flex; flex-direction: column; }
-        .flag { font-size: 1.5rem; margin-bottom: 4px; }
+        
+        /* Updated Flag Style for Images */
+        .flag { 
+            width: 28px; 
+            height: 21px; 
+            margin-bottom: 6px; 
+            border-radius: 3px; 
+            object-fit: cover;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            display: block;
+        }
+        
         .title { font-weight: 700; font-size: 1.1rem; }
         .subtitle { font-size: 0.8rem; color: var(--text-sub); }
-
-        .price-info { text-align: right; }
-        .price { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; display: block; }
+        .price { font-size: 1.4rem; font-weight: 700; display: block; }
         
         .badge {
             display: inline-block; padding: 4px 8px; border-radius: 6px;
@@ -187,101 +154,100 @@
         .badge.red { background: #fee2e2; color: #991b1b; }
         .badge.neutral { background: #f1f5f9; color: var(--text-sub); }
 
-        /* Chart Area */
         .chart-box { flex-grow: 1; position: relative; width: 100%; min-height: 0; }
 
-        /* RSI Meter */
-        .rsi-container { margin: 10px 0 15px 0; }
-        .rsi-labels { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px; font-weight: 600; }
-        .rsi-track { height: 8px; background: #e2e8f0; border-radius: 4px; position: relative; overflow: hidden; }
-        .rsi-gradient {
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, var(--success) 0%, #e2e8f0 35%, #e2e8f0 65%, var(--danger) 100%);
-        }
-        .rsi-pip {
-            position: absolute; top: 0; bottom: 0; width: 4px; background: var(--text-main);
-            transition: left 0.3s ease; z-index: 2;
-        }
+        /* --- Specific Tools CSS --- */
+        
+        /* Arbitrage */
+        .slider-wrapper { width: 100%; max-width: 300px; }
+        .slider-wrapper input { width: 100%; cursor: pointer; }
+        .slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-top: 5px; }
+        .slider-labels span.active { color: var(--primary); }
+        .rsi-track { height: 8px; background: #e2e8f0; border-radius: 4px; position: relative; overflow: hidden; margin-top:5px;}
+        .rsi-gradient { width: 100%; height: 100%; background: linear-gradient(90deg, var(--success) 0%, #e2e8f0 35%, #e2e8f0 65%, var(--danger) 100%); }
+        .rsi-pip { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--text-main); transition: left 0.3s ease; z-index: 2; }
 
-        .recommendation {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 8px;
-            padding: 4px;
-            border-radius: 4px;
-            background: #f8fafc;
+        /* Correlation Table */
+        .matrix-container { overflow-x: auto; background: var(--surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); }
+        table.corr-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .corr-table th, .corr-table td { padding: 10px; text-align: center; border: 1px solid var(--border); font-size: 0.9rem; }
+        .corr-table th { background: #f8fafc; color: var(--text-sub); font-weight: 700; }
+        .corr-cell { font-weight: 700; border-radius: 4px; }
+        
+        /* Bollinger List */
+        .bb-list { display: flex; flex-direction: column; gap: 15px; }
+        .bb-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; transition: transform 0.2s; cursor: pointer;
         }
+        .bb-item:hover { transform: translateX(5px); border-color: var(--primary); }
+        .bb-info { display: flex; flex-direction: column; }
+        .bb-squeeze-meter { width: 100px; height: 6px; background: #e2e8f0; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+        .bb-squeeze-fill { height: 100%; background: var(--primary); }
+        
+        /* CSM (Strength Meter) */
+        .csm-container { display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: 0 auto; }
+        .csm-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 8px; }
+        .csm-label { width: 50px; font-weight: 800; font-size: 1.1rem; }
+        .csm-track { flex-grow: 1; height: 24px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; }
+        .csm-fill { height: 100%; transition: width 0.5s ease; display: flex; align-items: center; padding-left: 10px; font-size: 0.75rem; color: white; font-weight: 700;}
+        .csm-val { width: 60px; text-align: right; font-weight: 700; }
 
-        /* Loader */
         .loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(4px);
-            z-index: 100;
-            display: flex; justify-content: center; align-items: center;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(4px);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
             font-weight: 600; color: var(--text-sub);
         }
         .hidden { display: none; }
-
-        /* Helper for mobile responsiveness */
-        .mobile-col { display: flex; flex-direction: column; gap: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="global-loader" class="loader">Loading Market Data...</div>
+    <div id="global-loader" class="loader">Loading FX Data...</div>
 
     <div class="container">
         <header class="app-header">
             <div class="app-title">FX Command Center</div>
-            <p class="app-subtitle">Real-time reference rates & statistical analysis</p>
+            <p class="app-subtitle">Analysis, Arbitrage, and Volatility Tools</p>
         </header>
 
-        <!-- Navigation Tabs -->
         <nav class="tabs">
-            <button class="tab-btn active" onclick="switchTab('market')">Market Watch</button>
-            <button class="tab-btn" onclick="switchTab('arbitrage')">Arbitrage Scanner</button>
+            <button class="tab-btn active" onclick="App.switchTab('market')">Market Watch</button>
+            <button class="tab-btn" onclick="App.switchTab('arbitrage')">Arbitrage Scanner</button>
+            <button class="tab-btn" onclick="App.switchTab('correlation')">Correlation Matrix</button>
+            <button class="tab-btn" onclick="App.switchTab('bollinger')">Bollinger Bands</button>
+            <button class="tab-btn" onclick="App.switchTab('strength')">Strength Meter</button>
         </nav>
 
-        <!-- VIEW 1: MARKET WATCH -->
+        <!-- 1. MARKET WATCH -->
         <section id="market-view" class="view-section active">
             <div class="toolbar">
                 <div class="select-wrapper">
                     <label>BASE CURRENCY</label>
-                    <select id="mw-base-select" onchange="MW.updateBase(this.value)">
-                        <!-- Populated by JS -->
-                    </select>
+                    <select id="mw-base-select" onchange="MW.updateBase(this.value)"></select>
                 </div>
-
-                <div class="mobile-col">
-                    <div class="btn-group">
-                        <button onclick="MW.updatePeriod(7, this)">1W</button>
-                        <button onclick="MW.updatePeriod(30, this)">1M</button>
-                        <button class="active" onclick="MW.updatePeriod(90, this)">3M</button>
-                        <button onclick="MW.updatePeriod(365, this)">1Y</button>
-                        <button onclick="MW.updatePeriod(1825, this)">5Y</button>
-                    </div>
+                <div class="btn-group">
+                    <button onclick="MW.updatePeriod(7, this)">1W</button>
+                    <button onclick="MW.updatePeriod(30, this)">1M</button>
+                    <button class="active" onclick="MW.updatePeriod(90, this)">3M</button>
+                    <button onclick="MW.updatePeriod(365, this)">1Y</button>
                 </div>
             </div>
             <div id="mw-grid" class="grid"></div>
         </section>
 
-        <!-- VIEW 2: ARBITRAGE SCANNER -->
+        <!-- 2. ARBITRAGE SCANNER -->
         <section id="arbitrage-view" class="view-section">
             <div class="toolbar">
                 <div class="toolbar-group">
                     <div class="select-wrapper">
                         <label>FOCUS CURRENCY</label>
-                        <select id="arb-base-select" onchange="ARB.updateBase(this.value)">
-                            <!-- Populated by JS -->
-                        </select>
+                        <select id="arb-base-select" onchange="ARB.updateBase(this.value)"></select>
                     </div>
-                    <div class="mobile-col" style="justify-content: center;">
-                        <div style="font-size:0.85rem; color:var(--text-sub)" id="arb-mode-label">Mode: RSI(14) Standard</div>
-                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-sub)" id="arb-mode-label">Mode: RSI(14) Standard</div>
                 </div>
-                
                 <div class="slider-wrapper">
                     <input type="range" min="0" max="5" step="1" value="3" oninput="ARB.handleSlider(this.value)">
                     <div class="slider-labels" id="arb-labels">
@@ -291,97 +257,153 @@
             </div>
             <div id="arb-grid" class="grid"></div>
         </section>
+
+        <!-- 3. CORRELATION MATRIX -->
+        <section id="correlation-view" class="view-section">
+            <div class="toolbar">
+                <div style="font-weight:700">Correlation Heatmap (90 Days)</div>
+                <div style="font-size:0.85rem; color:var(--text-sub)">
+                    Green = Moving Together | Red = Inverse | Grey = Uncorrelated (Safe Diversification)
+                </div>
+            </div>
+            <div class="matrix-container" id="corr-matrix"></div>
+        </section>
+
+        <!-- 4. BOLLINGER BANDS -->
+        <section id="bollinger-view" class="view-section">
+            <div class="toolbar">
+                <div class="select-wrapper">
+                    <label>SCAN BASE</label>
+                    <select id="bb-base-select" onchange="BB.updateBase(this.value)"></select>
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-sub)">
+                    Look for low Bandwidth (Squeeze). Low volatility often precedes a breakout.
+                </div>
+            </div>
+            <div class="grid">
+                <!-- List of Pairs -->
+                <div id="bb-list" class="bb-list" style="grid-column: span 1;"></div>
+                <!-- Selected Chart -->
+                <div class="card" style="grid-column: span 1; height: 400px; min-width:300px;">
+                    <div class="card-header">
+                        <div class="title" id="bb-chart-title">Select a Pair</div>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="bb-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CURRENCY STRENGTH -->
+        <section id="strength-view" class="view-section">
+            <div class="toolbar">
+                <div style="font-weight:700">Relative Currency Strength</div>
+                <div class="btn-group">
+                    <button class="active" onclick="CSM.update(7, this)">1 Week</button>
+                    <button onclick="CSM.update(30, this)">1 Month</button>
+                    <button onclick="CSM.update(180, this)">6 Months</button>
+                </div>
+            </div>
+            <div class="csm-container" id="csm-container"></div>
+        </section>
+
     </div>
 
     <script>
-        // === SHARED UTILITIES & CONFIG ===
-        
-        const CURRENCIES = {
-            'AUD': { flag: '🇦🇺', name: 'Australian Dollar' },
-            'USD': { flag: '🇺🇸', name: 'US Dollar' },
-            'EUR': { flag: '🇪🇺', name: 'Euro' },
-            'GBP': { flag: '🇬🇧', name: 'British Pound' },
-            'JPY': { flag: '🇯🇵', name: 'Japanese Yen' },
-            'NZD': { flag: '🇳🇿', name: 'NZ Dollar' },
-            'CAD': { flag: '🇨🇦', name: 'Canadian Dollar' },
-            'SGD': { flag: '🇸🇬', name: 'Singapore Dollar' },
-            'CHF': { flag: '🇨🇭', name: 'Swiss Franc' },
-            'CNY': { flag: '🇨🇳', name: 'Chinese Yuan' }
+        // === CORE CONFIG & UTILS ===
+        const CONFIG = {
+            // UPDATED: Using country codes for FlagCDN instead of Emojis
+            currencies: {
+                'AUD': { country: 'au', name: 'Australian Dollar' },
+                'USD': { country: 'us', name: 'US Dollar' },
+                'EUR': { country: 'eu', name: 'Euro' },
+                'GBP': { country: 'gb', name: 'British Pound' },
+                'JPY': { country: 'jp', name: 'Japanese Yen' },
+                'NZD': { country: 'nz', name: 'NZ Dollar' },
+                'CAD': { country: 'ca', name: 'Canadian Dollar' },
+                'CHF': { country: 'ch', name: 'Swiss Franc' },
+                'SGD': { country: 'sg', name: 'Singapore Dollar' },
+                'CNY': { country: 'cn', name: 'Chinese Yuan' }
+            },
+            pairs: ['EUR-USD', 'GBP-USD', 'AUD-USD', 'USD-JPY', 'USD-CAD', 'NZD-USD', 'USD-CHF']
         };
-
-        // Robust Date Parser to fix "Offset Since Epoch" issues
-        function parseDate(dateStr) {
-            return new Date(dateStr + 'T12:00:00');
-        }
-
-        function getStartDate(daysAgo) {
-            const d = new Date();
-            d.setDate(d.getDate() - daysAgo);
-            return d.toISOString().split('T')[0];
-        }
-
-        function formatTooltipDate(timestamp, showDayName) {
-            const date = new Date(timestamp);
-            const opts = { year: 'numeric', month: 'short', day: 'numeric' };
-            if (showDayName) opts.weekday = 'short';
-            return date.toLocaleDateString(undefined, opts);
-        }
 
         const Loader = {
             show: () => document.getElementById('global-loader').classList.remove('hidden'),
             hide: () => document.getElementById('global-loader').classList.add('hidden')
         };
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`).classList.add('active');
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(`${tabId}-view`).classList.add('active');
+        const DateUtils = {
+            parse: (str) => new Date(str + 'T12:00:00'),
+            getStart: (days) => {
+                const d = new Date(); d.setDate(d.getDate() - days);
+                return d.toISOString().split('T')[0];
+            },
+            format: (ts) => new Date(ts).toLocaleDateString(undefined, {month:'short', day:'numeric'})
+        };
 
-            if(tabId === 'market') MW.init();
-            if(tabId === 'arbitrage') ARB.init();
+        // Populate Selectors
+        function populateSelect(id, selectedVal) {
+            const sel = document.getElementById(id);
+            if(sel.children.length > 0) return;
+            Object.keys(CONFIG.currencies).forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.text = `${c} - ${CONFIG.currencies[c].name}`;
+                if(c === selectedVal) opt.selected = true;
+                sel.appendChild(opt);
+            });
         }
 
-        // === MODULE 1: MARKET WATCH (MW) ===
+        // === APP CONTROLLER ===
+        const App = {
+            activeTab: 'market',
+            switchTab: (tabId) => {
+                App.activeTab = tabId;
+                // UI
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector(`.tab-btn[onclick="App.switchTab('${tabId}')"]`).classList.add('active');
+                document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+                document.getElementById(`${tabId}-view`).classList.add('active');
+
+                // Init Module
+                if(tabId === 'market') MW.init();
+                if(tabId === 'arbitrage') ARB.init();
+                if(tabId === 'correlation') CORR.init();
+                if(tabId === 'bollinger') BB.init();
+                if(tabId === 'strength') CSM.init();
+            }
+        };
+
+        // === MODULE 1: MARKET WATCH (RESTORED) ===
         const MW = {
             base: 'AUD',
             days: 90,
             charts: {},
 
             init: function() {
-                const sel = document.getElementById('mw-base-select');
-                if (sel.children.length === 0) {
-                    Object.keys(CURRENCIES).forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.text = `${c} - ${CURRENCIES[c].name}`;
-                        if(c === this.base) opt.selected = true;
-                        sel.appendChild(opt);
-                    });
-                    this.fetchData();
-                }
+                populateSelect('mw-base-select', this.base);
+                this.fetch();
             },
 
-            updateBase: function(newBase) {
-                this.base = newBase;
-                this.fetchData();
+            updateBase: function(v) {
+                this.base = v;
+                this.fetch();
             },
 
-            updatePeriod: function(days, btn) {
-                this.days = days;
+            updatePeriod: function(d, btn) {
+                this.days = d;
                 btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                this.fetchData();
+                this.fetch();
             },
 
-            fetchData: async function() {
+            fetch: async function() {
                 Loader.show();
-                const targets = Object.keys(CURRENCIES).filter(c => c !== this.base).join(',');
-                const start = getStartDate(this.days);
-                const url = `https://api.frankfurter.app/${start}..?from=${this.base}&to=${targets}`;
-
+                const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
                 try {
-                    const res = await fetch(url);
+                    const res = await fetch(`https://api.frankfurter.app/${DateUtils.getStart(this.days)}..?from=${this.base}&to=${targets}`);
                     const data = await res.json();
                     this.render(data);
                 } catch(e) {
@@ -395,14 +417,17 @@
             render: function(data) {
                 const grid = document.getElementById('mw-grid');
                 grid.innerHTML = '';
+                
+                // Cleanup old charts
+                Object.values(this.charts).forEach(c => c.destroy());
                 this.charts = {};
 
                 const dates = Object.keys(data.rates).sort();
-                const targets = Object.keys(CURRENCIES).filter(c => c !== this.base);
+                const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base);
 
                 targets.forEach(code => {
                     const series = dates.map(d => ({
-                        x: parseDate(d),
+                        x: DateUtils.parse(d),
                         y: data.rates[d][code]
                     })).filter(pt => pt.y !== undefined);
 
@@ -413,14 +438,14 @@
                     const change = ((current - start) / start) * 100;
                     const isPos = change >= 0;
 
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
+                    const el = document.createElement('div');
+                    el.className = 'card';
+                    el.innerHTML = `
                         <div class="card-header">
                             <div class="currency-info">
-                                <span class="flag">${CURRENCIES[code].flag}</span>
+                                <img class="flag" src="https://flagcdn.com/48x36/${CONFIG.currencies[code].country}.png" alt="${code}">
                                 <span class="title">${this.base}/${code}</span>
-                                <span class="subtitle">${CURRENCIES[code].name}</span>
+                                <span class="subtitle">${CONFIG.currencies[code].name}</span>
                             </div>
                             <div class="price-info">
                                 <span class="price">${current.toFixed(code==='JPY'?2:4)}</span>
@@ -430,22 +455,25 @@
                             </div>
                         </div>
                         <div class="chart-box">
-                            <canvas id="mw-chart-${code}"></canvas>
+                            <canvas id="mw-c-${code}"></canvas>
                         </div>
                     `;
-                    grid.appendChild(card);
+                    grid.appendChild(el);
+                    
                     this.drawChart(code, series, isPos);
                 });
             },
 
             drawChart: function(code, data, isPositive) {
-                const ctx = document.getElementById(`mw-chart-${code}`).getContext('2d');
+                const ctx = document.getElementById(`mw-c-${code}`).getContext('2d');
                 const color = isPositive ? '#10b981' : '#ef4444';
+                
+                // Smart Axis Scaling (Restored)
                 const vals = data.map(d => d.y);
                 const min = Math.min(...vals) * 0.995;
                 const max = Math.max(...vals) * 1.005;
 
-                new Chart(ctx, {
+                this.charts[code] = new Chart(ctx, {
                     type: 'line',
                     data: {
                         datasets: [{
@@ -475,18 +503,21 @@
                                 intersect: false,
                                 mode: 'index',
                                 callbacks: {
-                                    title: (items) => formatTooltipDate(items[0].parsed.x, this.days <= 30)
+                                    title: (items) => DateUtils.format(items[0].parsed.x)
                                 }
                             }
                         },
-                        scales: { x: { type: 'time', display: false }, y: { display: false, min: min, max: max } },
+                        scales: {
+                            x: { type: 'time', display: false },
+                            y: { display: false, min: min, max: max }
+                        },
                         interaction: { intersect: false, mode: 'nearest', axis: 'x' }
                     }
                 });
             }
         };
 
-        // === MODULE 2: ARBITRAGE SCANNER (ARB) ===
+        // === MODULE 2: ARBITRAGE (RESTORED) ===
         const ARB = {
             base: 'AUD',
             currentSliderVal: 3,
@@ -503,17 +534,8 @@
 
             init: function() {
                 // Populate Dropdown
-                const sel = document.getElementById('arb-base-select');
-                if (sel.children.length === 0) {
-                    Object.keys(CURRENCIES).forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.text = `${c} - ${CURRENCIES[c].name}`;
-                        if(c === this.base) opt.selected = true;
-                        sel.appendChild(opt);
-                    });
-                    this.loadDataForBase(this.base);
-                }
+                populateSelect('arb-base-select', this.base);
+                this.loadDataForBase(this.base);
             },
 
             updateBase: function(newBase) {
@@ -529,8 +551,8 @@
                 }
 
                 Loader.show();
-                const start = getStartDate(2000); // 5Y + buffer
-                const targets = Object.keys(CURRENCIES).filter(c => c !== base).join(',');
+                const start = DateUtils.getStart(2000); // 5Y + buffer
+                const targets = Object.keys(CONFIG.currencies).filter(c => c !== base).join(',');
                 
                 try {
                     const res = await fetch(`https://api.frankfurter.app/${start}..?from=${base}&to=${targets}`);
@@ -538,14 +560,14 @@
                     
                     // Process & Cache
                     const dates = Object.keys(data.rates).sort();
-                    const targetList = Object.keys(CURRENCIES).filter(c => c !== base);
+                    const targetList = Object.keys(CONFIG.currencies).filter(c => c !== base);
                     
                     this.dataStore[base] = {}; // Init cache for this base
 
                     targetList.forEach(quote => {
                         this.dataStore[base][quote] = dates.map(d => ({
                             dateStr: d,
-                            dateObj: parseDate(d),
+                            dateObj: DateUtils.parse(d),
                             val: data.rates[d][quote]
                         })).filter(pt => pt.val !== undefined);
                     });
@@ -573,30 +595,17 @@
                 this.render(config);
             },
 
-            calculateRSI: function(values, period) {
-                if(values.length < period) return 50;
-                
-                let gains = 0, losses = 0;
-                for(let i=1; i<=period; i++) {
-                    const diff = values[i] - values[i-1];
-                    if(diff > 0) gains += diff; else losses += Math.abs(diff);
+            calcRSI: function(vals, len) {
+                if(vals.length < len) return 50;
+                let g=0, l=0;
+                for(let i=1; i<=len; i++) { const d=vals[i]-vals[i-1]; d>0?g+=d:l+=Math.abs(d); }
+                let ag=g/len, al=l/len;
+                for(let i=len+1; i<vals.length; i++) {
+                    const d=vals[i]-vals[i-1];
+                    ag=(ag*(len-1) + (d>0?d:0))/len;
+                    al=(al*(len-1) + (d<0?Math.abs(d):0))/len;
                 }
-                let avgGain = gains/period;
-                let avgLoss = losses/period;
-                
-                // Smoothing
-                for(let i=period+1; i<values.length; i++) {
-                    const diff = values[i] - values[i-1];
-                    const up = diff > 0 ? diff : 0;
-                    const down = diff < 0 ? Math.abs(diff) : 0;
-                    
-                    avgGain = ((avgGain * (period-1)) + up) / period;
-                    avgLoss = ((avgLoss * (period-1)) + down) / period;
-                }
-
-                if(avgLoss === 0) return 100;
-                const rs = avgGain / avgLoss;
-                return 100 - (100 / (1 + rs));
+                return 100 - (100/(1+(ag/al||0)));
             },
 
             render: function(config) {
@@ -604,7 +613,7 @@
                 grid.innerHTML = ''; // Full re-render for dynamic pairs
                 this.charts = {};
 
-                const targetList = Object.keys(CURRENCIES).filter(c => c !== this.base);
+                const targetList = Object.keys(CONFIG.currencies).filter(c => c !== this.base);
 
                 targetList.forEach(quote => {
                     // Unique ID for DOM elements
@@ -621,7 +630,7 @@
 
                     // Calculate RSI
                     const prices = slice.map(d => d.val);
-                    const rsi = this.calculateRSI(prices, config.rsi);
+                    const rsi = this.calcRSI(prices, config.rsi);
                     const currentPrice = prices[prices.length-1];
 
                     // Recommendation Logic
@@ -641,7 +650,10 @@
                     div.className = 'card';
                     div.innerHTML = `
                         <div class="card-header">
-                            <div><div class="title">${this.base}/${quote}</div></div>
+                            <div class="currency-info">
+                                <img class="flag" src="https://flagcdn.com/48x36/${CONFIG.currencies[quote].country}.png" alt="${quote}">
+                                <span class="title">${this.base}/${quote}</span>
+                            </div>
                             <div class="price-info">
                                 <div class="price">${currentPrice.toFixed(4)}</div>
                             </div>
@@ -656,7 +668,7 @@
                                 <div class="rsi-pip" style="left:${rsi}%"></div>
                             </div>
                         </div>
-                        <div class="recommendation" style="color:${actionColor}; border:1px solid ${actionColor}20; background:${actionColor}10">
+                        <div class="recommendation" style="font-size:0.8rem; font-weight:700; text-align:center; margin-top:8px; padding:4px; border-radius:4px; background:#f8fafc; color:${actionColor}; border:1px solid ${actionColor}20; background:${actionColor}10">
                             Signal: ${rsi < 30 ? 'Oversold (Cheap)' : (rsi > 70 ? 'Overbought (Expensive)' : 'Fair Value')}
                         </div>
                         <div class="chart-box" style="margin-top:10px">
@@ -696,13 +708,256 @@
                                 intersect: false,
                                 mode: 'index',
                                 callbacks: {
-                                    title: (items) => formatTooltipDate(items[0].parsed.x, false)
+                                    title: (items) => DateUtils.format(items[0].parsed.x)
                                 }
                             }
                         },
                         scales: { x: { type: 'time', display: false }, y: { display: false } },
                         interaction: { intersect: false, mode: 'nearest', axis: 'x' }
                     }
+                });
+            }
+        };
+
+        // === MODULE 3: CORRELATION MATRIX ===
+        const CORR = {
+            pairs: ['EUR-USD', 'GBP-USD', 'USD-JPY', 'AUD-USD', 'USD-CAD', 'NZD-USD'],
+            init: async function() {
+                Loader.show();
+                try {
+                    // Fetch data relative to USD for standardization
+                    const start = DateUtils.getStart(90);
+                    // Fetch EUR based, then convert
+                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=EUR`);
+                    const data = await res.json();
+                    this.calc(data);
+                } catch(e) { console.error(e); } finally { Loader.hide(); }
+            },
+            getReturns: function(data, base, quote) {
+                const dates = Object.keys(data.rates).sort();
+                const prices = dates.map(d => {
+                    const rates = data.rates[d];
+                    // EUR is base in data. 
+                    // To get Base/Quote: (EUR/Quote) / (EUR/Base)
+                    const rBase = base === 'EUR' ? 1 : rates[base];
+                    const rQuote = quote === 'EUR' ? 1 : rates[quote];
+                    return rQuote / rBase;
+                });
+                // Calculate daily % returns
+                const rets = [];
+                for(let i=1; i<prices.length; i++) {
+                    rets.push((prices[i] - prices[i-1]) / prices[i-1]);
+                }
+                return rets;
+            },
+            pearson: function(x, y) {
+                let n = x.length;
+                let sumX=0, sumY=0, sumXY=0, sumX2=0, sumY2=0;
+                for(let i=0; i<n; i++) {
+                    sumX += x[i]; sumY += y[i];
+                    sumXY += x[i]*y[i];
+                    sumX2 += x[i]*x[i]; sumY2 += y[i]*y[i];
+                }
+                const num = (n*sumXY) - (sumX*sumY);
+                const den = Math.sqrt(((n*sumX2)-(sumX*sumX)) * ((n*sumY2)-(sumY*sumY)));
+                return den === 0 ? 0 : num/den;
+            },
+            calc: function(data) {
+                const matrix = [];
+                // Pairs to analyze
+                const pList = this.pairs;
+                
+                // Pre-calc returns
+                const returnsMap = {};
+                pList.forEach(p => {
+                    const [b, q] = p.split('-');
+                    returnsMap[p] = this.getReturns(data, b, q);
+                });
+
+                let html = '<table class="corr-table"><thead><tr><th></th>';
+                pList.forEach(p => html += `<th>${p}</th>`);
+                html += '</tr></thead><tbody>';
+
+                pList.forEach(rowP => {
+                    html += `<tr><td><strong>${rowP}</strong></td>`;
+                    pList.forEach(colP => {
+                        if(rowP === colP) {
+                            html += '<td style="background:#e2e8f0">-</td>';
+                        } else {
+                            const val = this.pearson(returnsMap[rowP], returnsMap[colP]);
+                            let bg = '#ffffff';
+                            if(val > 0.5) bg = `rgba(16, 185, 129, ${val})`; // Green
+                            else if(val < -0.5) bg = `rgba(239, 68, 68, ${Math.abs(val)})`; // Red
+                            html += `<td style="background:${bg}" class="corr-cell">${val.toFixed(2)}</td>`;
+                        }
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                document.getElementById('corr-matrix').innerHTML = html;
+            }
+        };
+
+        // === MODULE 4: BOLLINGER BANDS ===
+        const BB = {
+            base: 'AUD',
+            init: function() { populateSelect('bb-base-select', this.base); this.fetch(); },
+            updateBase: function(v) { this.base = v; this.fetch(); },
+            fetch: async function() {
+                Loader.show();
+                const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
+                const start = DateUtils.getStart(100);
+                try {
+                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=${this.base}&to=${targets}`);
+                    const data = await res.json();
+                    this.process(data);
+                } catch(e) { console.error(e); } finally { Loader.hide(); }
+            },
+            calcBB: function(prices) {
+                const period = 20;
+                const sma = prices.slice(-period).reduce((a,b)=>a+b,0)/period;
+                const sqDiff = prices.slice(-period).map(p => Math.pow(p-sma, 2)).reduce((a,b)=>a+b,0)/period;
+                const sd = Math.sqrt(sqDiff);
+                const upper = sma + (2*sd);
+                const lower = sma - (2*sd);
+                const bw = (upper-lower)/sma; // Bandwidth (Squeeze metric)
+                return { sma, upper, lower, bw };
+            },
+            process: function(data) {
+                const listEl = document.getElementById('bb-list'); listEl.innerHTML = '';
+                const dates = Object.keys(data.rates).sort();
+                
+                // Calculate metrics for all pairs
+                const results = [];
+                Object.keys(data.rates[dates[0]]).forEach(code => {
+                    const prices = dates.map(d => data.rates[d][code]);
+                    const bb = this.calcBB(prices);
+                    results.push({ code, prices, ...bb });
+                });
+
+                // Sort by tightest squeeze (lowest bandwidth)
+                results.sort((a,b) => a.bw - b.bw);
+
+                // Render List
+                results.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'bb-item';
+                    const pct = Math.min(100, item.bw * 1000); // Scale for visual
+                    div.innerHTML = `
+                        <div class="bb-info">
+                            <span class="title">${this.base}/${item.code}</span>
+                            <span class="subtitle">Bandwidth: ${(item.bw*100).toFixed(2)}%</span>
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem; text-align:right;">${idx===0 ? '🔥 SQUEEZE' : 'Volatility'}</div>
+                            <div class="bb-squeeze-meter"><div class="bb-squeeze-fill" style="width:${pct}%; background:${idx===0?'#ef4444':'#3b82f6'}"></div></div>
+                        </div>
+                    `;
+                    div.onclick = () => this.drawChart(item);
+                    listEl.appendChild(div);
+                });
+
+                // Draw first one
+                if(results.length > 0) this.drawChart(results[0]);
+            },
+            drawChart: function(item) {
+                document.getElementById('bb-chart-title').innerText = `${this.base}/${item.code} - 20 Day Bollinger Bands`;
+                const ctx = document.getElementById('bb-chart').getContext('2d');
+                
+                // Need full history for chart, but calculate bands for every point? 
+                // Simple approx: just show price + current bands lines (flat) or better: dynamic bands
+                // Calculating dynamic bands for the whole chart is heavy. Let's just plot price and show last bands.
+                // Actually, let's calc dynamic bands for visual.
+                
+                const prices = item.prices;
+                const bandData = [];
+                for(let i=20; i<prices.length; i++) {
+                    const slice = prices.slice(i-20, i);
+                    const avg = slice.reduce((a,b)=>a+b,0)/20;
+                    const sd = Math.sqrt(slice.map(p=>Math.pow(p-avg,2)).reduce((a,b)=>a+b,0)/20);
+                    bandData.push({ x:i, u:avg+(2*sd), l:avg-(2*sd), m:avg, p:prices[i] });
+                }
+
+                const labels = bandData.map((_, i) => i);
+                
+                if(this.chart) this.chart.destroy();
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Upper', data: bandData.map(d=>d.u), borderColor: 'rgba(59,130,246,0.3)', borderWidth:1, pointRadius:0, fill:false },
+                            { label: 'Lower', data: bandData.map(d=>d.l), borderColor: 'rgba(59,130,246,0.3)', borderWidth:1, pointRadius:0, fill:'-1', backgroundColor:'rgba(59,130,246,0.05)' },
+                            { label: 'Price', data: bandData.map(d=>d.p), borderColor: '#0f172a', borderWidth:2, pointRadius:0 }
+                        ]
+                    },
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}} }
+                });
+            }
+        };
+
+        // === MODULE 5: STRENGTH METER ===
+        const CSM = {
+            init: function() { this.update(7, document.querySelector('#strength-view button')); },
+            update: async function(days, btn) {
+                if(btn) {
+                    btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+                Loader.show();
+                try {
+                    // Fetch EUR based history
+                    const start = DateUtils.getStart(days+1);
+                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=EUR`);
+                    const data = await res.json();
+                    
+                    const dates = Object.keys(data.rates).sort();
+                    const startRates = data.rates[dates[0]];
+                    const endRates = data.rates[dates[dates.length-1]];
+                    
+                    // Add EUR itself (value 1)
+                    startRates['EUR'] = 1; endRates['EUR'] = 1;
+
+                    const scores = [];
+                    const currencies = Object.keys(CONFIG.currencies);
+
+                    // Logic: Calculate how each currency performed against a BASKET of all others
+                    currencies.forEach(curr => {
+                        let totalChange = 0;
+                        currencies.forEach(opponent => {
+                            if(curr === opponent) return;
+                            // Rate Base/Quote = EUR/Quote / EUR/Base
+                            const startRate = startRates[opponent] / startRates[curr];
+                            const endRate = endRates[opponent] / endRates[curr];
+                            const change = ((endRate - startRate) / startRate) * 100;
+                            totalChange += change;
+                        });
+                        scores.push({ code: curr, score: totalChange / (currencies.length-1) });
+                    });
+
+                    scores.sort((a,b) => b.score - a.score);
+                    this.render(scores);
+                } catch(e) { console.error(e); } finally { Loader.hide(); }
+            },
+            render: function(scores) {
+                const con = document.getElementById('csm-container'); con.innerHTML = '';
+                const max = Math.max(...scores.map(s => Math.abs(s.score)));
+                
+                scores.forEach(s => {
+                    const row = document.createElement('div'); row.className = 'csm-bar';
+                    const isPos = s.score >= 0;
+                    const pct = (Math.abs(s.score) / max) * 100;
+                    
+                    row.innerHTML = `
+                        <div class="csm-label">${s.code}</div>
+                        <div class="csm-track">
+                            <div class="csm-fill" style="width:${pct}%; background:${isPos?'#10b981':'#ef4444'}; margin-left: ${isPos?0:'auto'}; margin-right:${isPos?'auto':0}">
+                                ${Math.abs(s.score).toFixed(2)}%
+                            </div>
+                        </div>
+                        <div class="csm-val" style="color:${isPos?'#166534':'#991b1b'}">${isPos?'+':''}${s.score.toFixed(2)}%</div>
+                    `;
+                    con.appendChild(row);
                 });
             }
         };
