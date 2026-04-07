@@ -404,7 +404,7 @@
                 Loader.show();
                 const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
                 try {
-                    const res = await fetch(`https://api.frankfurter.app/${DateUtils.getStart(this.days)}..?from=${this.base}&to=${targets}`);
+                    const res = await fetch(`https://api.frankfurter.dev/v1/${DateUtils.getStart(this.days)}..?from=${this.base}&to=${targets}`);
                     const data = await res.json();
                     this.render(data);
                 } catch(e) {
@@ -556,7 +556,7 @@
                 const targets = Object.keys(CONFIG.currencies).filter(c => c !== base).join(',');
                 
                 try {
-                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=${base}&to=${targets}`);
+                    const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=${base}&to=${targets}`);
                     const data = await res.json();
                     
                     // Process & Cache
@@ -729,7 +729,7 @@
                     // Fetch data relative to USD for standardization
                     const start = DateUtils.getStart(90);
                     // Fetch EUR based, then convert
-                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=EUR`);
+                    const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=EUR`);
                     const data = await res.json();
                     this.calc(data);
                 } catch(e) { console.error(e); } finally { Loader.hide(); }
@@ -809,7 +809,7 @@
                 const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
                 const start = DateUtils.getStart(100);
                 try {
-                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=${this.base}&to=${targets}`);
+                    const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=${this.base}&to=${targets}`);
                     const data = await res.json();
                     this.process(data);
                 } catch(e) { console.error(e); } finally { Loader.hide(); }
@@ -909,7 +909,7 @@
                 try {
                     // Fetch EUR based history
                     const start = DateUtils.getStart(days+1);
-                    const res = await fetch(`https://api.frankfurter.app/${start}..?from=EUR`);
+                    const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=EUR`);
                     const data = await res.json();
                     
                     const dates = Object.keys(data.rates).sort();
