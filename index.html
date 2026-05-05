@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FX Command Center</title>
@@ -202,6 +202,48 @@
             font-weight: 600; color: var(--text-sub);
         }
         .hidden { display: none; }
+
+        .info-details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05);
+        }
+        .info-summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 14px 18px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-summary::-webkit-details-marker { display: none; }
+        .info-summary::before {
+            content: '▸';
+            color: var(--text-sub);
+            transition: transform 0.2s ease;
+        }
+        .info-details[open] .info-summary::before { transform: rotate(90deg); }
+        .info-content {
+            padding: 0 18px 18px;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .info-content p { margin: 0 0 12px; }
+        .info-content ul { margin: 0 0 12px 18px; padding: 0; }
+        .info-content li { margin-bottom: 8px; }
+        .info-content strong { color: var(--text-main); }
+        .info-content a { color: var(--primary); }
+        .info-links {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -237,6 +279,22 @@
                 </div>
             </div>
             <div id="mw-grid" class="grid"></div>
+            <div style="margin-top: 30px;">
+                <details class="info-details">
+                    <summary class="info-summary">About Market Watch</summary>
+                    <div class="info-content">
+                        <p><strong>Market Watch</strong> gives you a quick snapshot of how one base currency is trading against the rest of the tracked currency set. It is useful when you want to answer: "How has AUD, USD, or EUR been moving against other currencies over the last week, month, quarter, or year?"</p>
+                        <ul>
+                            <li><strong>Base currency</strong> is the currency you are measuring from. A card labeled <strong>AUD/USD</strong> means "how many USD one AUD buys." See <a href="https://en.wikipedia.org/wiki/Exchange_rate" target="_blank" rel="noopener noreferrer">Wikipedia: Exchange rate</a>.</li>
+                            <li><strong>Current price</strong> is the latest exchange rate available from the data feed for that pair.</li>
+                            <li><strong>% change badge</strong> shows how much the pair moved over the selected period using a simple percentage return: <code>((current - start) / start) × 100</code>. Green means the pair rose; red means it fell. See <a href="https://en.wikipedia.org/wiki/Rate_of_return" target="_blank" rel="noopener noreferrer">Wikipedia: Rate of return</a>.</li>
+                            <li><strong>Mini chart</strong> is a sparkline of the pair over the selected time window. It helps you see trend shape and volatility at a glance rather than only the start and end values.</li>
+                            <li><strong>Time buttons</strong> change the comparison window, so the same pair can look very different over 1 week versus 1 year.</li>
+                        </ul>
+                        <p class="info-links"><strong>Learn more:</strong> <a href="https://en.wikipedia.org/wiki/Exchange_rate" target="_blank" rel="noopener noreferrer">Exchange rates</a> · <a href="https://en.wikipedia.org/wiki/Rate_of_return" target="_blank" rel="noopener noreferrer">Rate of return</a></p>
+                    </div>
+                </details>
+            </div>
         </section>
 
         <!-- 2. ARBITRAGE SCANNER -->
@@ -257,6 +315,23 @@
                 </div>
             </div>
             <div id="arb-grid" class="grid"></div>
+            <div style="margin-top: 30px;">
+                <details class="info-details">
+                    <summary class="info-summary">About Arbitrage Scanner</summary>
+                    <div class="info-content">
+                        <p><strong>Arbitrage Scanner</strong> is best understood as a momentum and relative-value view rather than true risk-free arbitrage. It looks at how stretched or balanced each FX pair appears by using the <strong>Relative Strength Index (RSI)</strong> over different historical windows.</p>
+                        <ul>
+                            <li><strong>Focus currency</strong> is the base currency compared against every other tracked quote currency.</li>
+                            <li><strong>Mode / slider window</strong> changes the historical lookback and RSI sensitivity. Shorter windows react faster; longer windows are smoother.</li>
+                            <li><strong>RSI value</strong> is a momentum oscillator from 0 to 100 based on average gains versus average losses. See <a href="https://en.wikipedia.org/wiki/Relative_strength_index" target="_blank" rel="noopener noreferrer">Wikipedia: Relative Strength Index</a>.</li>
+                            <li><strong>Signal</strong> interprets RSI using common thresholds: below 30 is labeled <strong>oversold</strong>, above 70 is <strong>overbought</strong>, and values in between are treated as <strong>fair value / hold</strong>.</li>
+                            <li><strong>Recommendation text</strong> translates that signal into a plain-language action suggestion, but it is still an indicator, not a guarantee.</li>
+                            <li><strong>Line chart</strong> shows the price path used to judge the current RSI reading so you can see whether the move was sharp, gradual, or choppy.</li>
+                        </ul>
+                        <p class="info-links"><strong>Learn more:</strong> <a href="https://en.wikipedia.org/wiki/Relative_strength_index" target="_blank" rel="noopener noreferrer">Relative Strength Index (RSI)</a> · <a href="https://en.wikipedia.org/wiki/Momentum_(finance)" target="_blank" rel="noopener noreferrer">Momentum in finance</a></p>
+                    </div>
+                </details>
+            </div>
         </section>
 
         <!-- 3. CORRELATION MATRIX -->
@@ -268,6 +343,23 @@
                 </div>
             </div>
             <div class="matrix-container" id="corr-matrix"></div>
+            <div style="margin-top: 30px;">
+                <details class="info-details">
+                    <summary class="info-summary">About Correlation Matrix</summary>
+                    <div class="info-content">
+                        <p><strong>Correlation Matrix</strong> shows how strongly major FX pairs have been moving together over roughly the last 90 days. This helps users spot clusters of similar behavior and pairs that may offer diversification.</p>
+                        <ul>
+                            <li><strong>Each cell</strong> compares one pair against another using the <strong>Pearson correlation coefficient</strong>, a standard measure of linear co-movement. See <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient" target="_blank" rel="noopener noreferrer">Wikipedia: Pearson correlation coefficient</a>.</li>
+                            <li><strong>Values near +1</strong> mean the two pairs have tended to move in the same direction.</li>
+                            <li><strong>Values near -1</strong> mean they have tended to move in opposite directions.</li>
+                            <li><strong>Values near 0</strong> mean there has been little consistent linear relationship.</li>
+                            <li><strong>Color coding</strong> makes the pattern easier to scan: green for stronger positive correlation, red for stronger negative correlation, and neutral tones for weak relationship.</li>
+                            <li><strong>Important caveat:</strong> correlation describes recent historical behavior, not a permanent rule. It can change when market regimes change.</li>
+                        </ul>
+                        <p class="info-links"><strong>Learn more:</strong> <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient" target="_blank" rel="noopener noreferrer">Pearson correlation coefficient</a> · <a href="https://en.wikipedia.org/wiki/Diversification_(finance)" target="_blank" rel="noopener noreferrer">Diversification</a></p>
+                    </div>
+                </details>
+            </div>
         </section>
 
         <!-- 4. BOLLINGER BANDS -->
@@ -294,6 +386,22 @@
                     </div>
                 </div>
             </div>
+            <div style="margin-top: 30px;">
+                <details class="info-details">
+                    <summary class="info-summary">About Bollinger Bands</summary>
+                    <div class="info-content">
+                        <p><strong>Bollinger Bands</strong> help users judge whether a market is relatively quiet or unusually volatile. This tab ranks pairs by <strong>bandwidth</strong>, which is a compact way to measure how tight or wide the bands are around price.</p>
+                        <ul>
+                            <li><strong>Scan base</strong> sets the base currency, then the app evaluates all matching pairs against other tracked currencies.</li>
+                            <li><strong>Bollinger Bands</strong> are built from a moving average plus and minus a multiple of standard deviation. In this app, the window is 20 periods and the bands are set at ±2 standard deviations. See <a href="https://en.wikipedia.org/wiki/Bollinger_Bands" target="_blank" rel="noopener noreferrer">Wikipedia: Bollinger Bands</a>.</li>
+                            <li><strong>Bandwidth</strong> measures how wide the bands are relative to the moving average. Lower bandwidth means price has been compressed into a tighter range.</li>
+                            <li><strong>Squeeze</strong> marks the pair with the lowest bandwidth in the list. Traders often watch squeezes because low volatility can come before larger moves, though direction is not predicted by the squeeze alone.</li>
+                            <li><strong>Band chart</strong> shows the upper band, lower band, and price together so users can visually inspect whether price is expanding, contracting, or hugging a band.</li>
+                        </ul>
+                        <p class="info-links"><strong>Learn more:</strong> <a href="https://en.wikipedia.org/wiki/Bollinger_Bands" target="_blank" rel="noopener noreferrer">Bollinger Bands</a> · <a href="https://en.wikipedia.org/wiki/Standard_deviation" target="_blank" rel="noopener noreferrer">Standard deviation</a> · <a href="https://en.wikipedia.org/wiki/Moving_average" target="_blank" rel="noopener noreferrer">Moving average</a></p>
+                    </div>
+                </details>
+            </div>
         </section>
 
         <!-- 5. CURRENCY STRENGTH -->
@@ -307,6 +415,23 @@
                 </div>
             </div>
             <div class="csm-container" id="csm-container"></div>
+            <div style="margin-top: 30px;">
+                <details class="info-details">
+                    <summary class="info-summary">About Strength Meter</summary>
+                    <div class="info-content">
+                        <p><strong>Strength Meter</strong> estimates how strong or weak each currency has been relative to a basket of the other tracked currencies over the selected window. Instead of looking at just one pair, it tries to summarize broader relative performance.</p>
+                        <ul>
+                            <li><strong>Strength score</strong> is the average percentage change of one currency measured against every other currency in the set.</li>
+                            <li><strong>Positive values</strong> mean that currency has generally strengthened relative to peers during the selected period.</li>
+                            <li><strong>Negative values</strong> mean it has generally weakened.</li>
+                            <li><strong>Bar length</strong> is scaled relative to the strongest absolute reading in the current view, so it is best used for ranking and comparison within the same timeframe.</li>
+                            <li><strong>Time buttons</strong> let you compare short-term leadership (1 week) versus broader moves (1 month or 6 months).</li>
+                            <li><strong>Why this matters:</strong> currencies that appear consistently strong or weak across many cross-rates can reflect broad market preference, not just noise in a single pair.</li>
+                        </ul>
+                        <p class="info-links"><strong>Learn more:</strong> <a href="https://en.wikipedia.org/wiki/Exchange_rate" target="_blank" rel="noopener noreferrer">Exchange rates</a> · <a href="https://en.wikipedia.org/wiki/Arithmetic_mean" target="_blank" rel="noopener noreferrer">Arithmetic mean</a> · <a href="https://en.wikipedia.org/wiki/Rate_of_return" target="_blank" rel="noopener noreferrer">Rate of return</a></p>
+                    </div>
+                </details>
+            </div>
         </section>
 
     </div>
