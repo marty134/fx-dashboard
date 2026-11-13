@@ -5,8 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FX Command Center</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <!-- Pinned versions with Subresource Integrity. When upgrading, update the version AND the integrity hash. -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"
+            integrity="sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"
+            integrity="sha384-cVMg8E3QFwTvGCDuK+ET4PD341jF3W8nO1auiXfuZNQkzbUUiBGLsIQUE+b1mxws"
+            crossorigin="anonymous"></script>
     <style>
         :root {
             --bg: #f8fafc;
@@ -455,9 +460,17 @@
             pairs: ['EUR-USD', 'GBP-USD', 'AUD-USD', 'USD-JPY', 'USD-CAD', 'NZD-USD', 'USD-CHF']
         };
 
+        // Counts in-flight requests so the overlay stays up until the last one finishes
         const Loader = {
-            show: () => document.getElementById('global-loader').classList.remove('hidden'),
-            hide: () => document.getElementById('global-loader').classList.add('hidden')
+            pending: 0,
+            show: () => {
+                Loader.pending++;
+                document.getElementById('global-loader').classList.remove('hidden');
+            },
+            hide: () => {
+                Loader.pending = Math.max(0, Loader.pending - 1);
+                if(Loader.pending === 0) document.getElementById('global-loader').classList.add('hidden');
+            }
         };
 
         const DateUtils = {
@@ -525,12 +538,16 @@
                 this.fetch();
             },
 
+            reqId: 0,
+
             fetch: async function() {
+                const reqId = ++this.reqId;
                 Loader.show();
                 const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
                 try {
                     const res = await fetch(`https://api.frankfurter.dev/v1/${DateUtils.getStart(this.days)}..?from=${this.base}&to=${targets}`);
                     const data = await res.json();
+                    if(reqId !== this.reqId) return; // superseded by a newer base/period selection
                     this.render(data);
                 } catch(e) {
                     console.error(e);
@@ -688,17 +705,18 @@
                     const dates = Object.keys(data.rates).sort();
                     const targetList = Object.keys(CONFIG.currencies).filter(c => c !== base);
                     
-                    this.dataStore[base] = {}; // Init cache for this base
-
+                    const store = {};
                     targetList.forEach(quote => {
-                        this.dataStore[base][quote] = dates.map(d => ({
+                        store[quote] = dates.map(d => ({
                             dateStr: d,
                             dateObj: DateUtils.parse(d),
                             val: data.rates[d][quote]
                         })).filter(pt => pt.val !== undefined);
                     });
+                    this.dataStore[base] = store;
 
-                    this.handleSlider(this.currentSliderVal);
+                    // Cache regardless, but only render if the user hasn't since switched base
+                    if(base === this.base) this.handleSlider(this.currentSliderVal);
                 } catch(e) {
                     console.error(e);
                     alert("Error loading Arbitrage Data");
@@ -735,23 +753,36 @@
             },
 
             render: function(config) {
+                const store = this.dataStore[this.base];
+                if(!store) return; // data for this base is still loading; it renders on arrival
+
+                // Destroy previous Chart.js instances before discarding their canvases
+                Object.values(this.charts).forEach(c => c.destroy());
+                this.charts = {};
+
                 const grid = document.getElementById('arb-grid');
                 grid.innerHTML = ''; // Full re-render for dynamic pairs
-                this.charts = {};
+
+                // The window is in calendar days, but the feed only has business days,
+                // so select the visible range by date rather than by point count.
+                const cutoff = DateUtils.getStart(config.days);
 
                 const targetList = Object.keys(CONFIG.currencies).filter(c => c !== this.base);
 
                 targetList.forEach(quote => {
                     // Unique ID for DOM elements
                     const pairId = `${this.base}-${quote}`;
-                    const allData = this.dataStore[this.base][quote];
-                    
+                    const allData = store[quote];
+
                     if(!allData) return;
 
-                    // Slice data needed for calc
+                    const firstVisible = allData.findIndex(d => d.dateStr >= cutoff);
+                    if(firstVisible === -1) return;
+
+                    // RSI input: the visible window plus a warm-up buffer of earlier points
                     const buffer = config.rsi * 2;
-                    const slice = allData.slice(-(config.days + buffer));
-                    
+                    const slice = allData.slice(Math.max(0, firstVisible - buffer));
+
                     if(slice.length < config.rsi) return;
 
                     // Calculate RSI
@@ -804,7 +835,7 @@
                     grid.appendChild(div);
 
                     // Chart
-                    const visibleData = slice.slice(-config.days).map(d => ({ x: d.dateObj, y: d.val }));
+                    const visibleData = allData.slice(firstVisible).map(d => ({ x: d.dateObj, y: d.val }));
                     this.drawChart(pairId, visibleData, rsi);
                 });
             },
@@ -813,7 +844,7 @@
                 const ctx = document.getElementById(`arb-chart-${id}`).getContext('2d');
                 const color = rsi < 30 ? '#10b981' : (rsi > 70 ? '#ef4444' : '#64748b');
 
-                new Chart(ctx, {
+                this.charts[id] = new Chart(ctx, {
                     type: 'line',
                     data: {
                         datasets: [{
@@ -929,13 +960,16 @@
             base: 'AUD',
             init: function() { populateSelect('bb-base-select', this.base); this.fetch(); },
             updateBase: function(v) { this.base = v; this.fetch(); },
+            reqId: 0,
             fetch: async function() {
+                const reqId = ++this.reqId;
                 Loader.show();
                 const targets = Object.keys(CONFIG.currencies).filter(c => c !== this.base).join(',');
                 const start = DateUtils.getStart(100);
                 try {
                     const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=${this.base}&to=${targets}`);
                     const data = await res.json();
+                    if(reqId !== this.reqId) return; // superseded by a newer base selection
                     this.process(data);
                 } catch(e) { console.error(e); } finally { Loader.hide(); }
             },
@@ -997,8 +1031,9 @@
                 
                 const prices = item.prices;
                 const bandData = [];
-                for(let i=20; i<prices.length; i++) {
-                    const slice = prices.slice(i-20, i);
+                // Band at day i uses the 20 days ending at (and including) day i, matching calcBB
+                for(let i=19; i<prices.length; i++) {
+                    const slice = prices.slice(i-19, i+1);
                     const avg = slice.reduce((a,b)=>a+b,0)/20;
                     const sd = Math.sqrt(slice.map(p=>Math.pow(p-avg,2)).reduce((a,b)=>a+b,0)/20);
                     bandData.push({ x:i, u:avg+(2*sd), l:avg-(2*sd), m:avg, p:prices[i] });
@@ -1025,18 +1060,21 @@
         // === MODULE 5: STRENGTH METER ===
         const CSM = {
             init: function() { this.update(7, document.querySelector('#strength-view button')); },
+            reqId: 0,
             update: async function(days, btn) {
                 if(btn) {
                     btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                 }
+                const reqId = ++this.reqId;
                 Loader.show();
                 try {
                     // Fetch EUR based history
                     const start = DateUtils.getStart(days+1);
                     const res = await fetch(`https://api.frankfurter.dev/v1/${start}..?from=EUR`);
                     const data = await res.json();
-                    
+                    if(reqId !== this.reqId) return; // superseded by a newer period selection
+
                     const dates = Object.keys(data.rates).sort();
                     const startRates = data.rates[dates[0]];
                     const endRates = data.rates[dates[dates.length-1]];
